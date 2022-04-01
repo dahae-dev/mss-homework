@@ -21,6 +21,7 @@ const Topbar = styled.div`
   top: 0;
   left: 0;
   right: 0;
+  background-color: ${({ theme }) => theme.colors.white};
 `;
 
 const Body = styled.div`

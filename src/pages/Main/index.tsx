@@ -1,12 +1,15 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
-import { px } from 'styled-components-spacing';
+import { px, py } from 'styled-components-spacing';
 
 import Align from 'components/Align';
+import Chip from 'components/Chip';
 import Img from 'components/Img';
 import ItemCard from 'components/ItemCard';
 import Page from 'components/Page';
 import Spinner from 'components/Spinner';
+import Stack from 'components/Stack';
+import Tag from 'components/Tag';
 import useIntersectionObservser from 'hooks/useIntersectionObserver';
 import Logo from 'statics/images/logo.svg';
 
@@ -21,6 +24,17 @@ const LogoWrapper = styled.div`
   color: ${({ theme }) => theme.colors.white};
   z-index: ${({ theme }) => theme.zIndexes[1]};
   ${px(1.5)}
+`;
+
+const FilterWrapper = styled.div`
+  ${px(1)}
+  ${py(1.75)}
+`;
+
+const TagWrapper = styled.div<{ hidden: boolean }>`
+  ${px(2)}
+  ${py(1.5)}
+  ${({ hidden }) => hidden ? 'display: none;' : ''};
 `;
 
 const Divider = styled.div`
@@ -44,6 +58,21 @@ const LoadMoreSection = styled.div`
   justify-content: center;
 `;
 
+const filters = [
+  {
+    id: 'isSaleOnly',
+    name: '세일상품',
+  },
+  {
+    id: 'isExclusiveOnly',
+    name: '단독상품',
+  },
+  {
+    id: 'isSoldOutIncluded',
+    name: '품절포함',
+  },
+] as const;
+
 const Main = () => {
   const {
     data,
@@ -53,7 +82,6 @@ const Main = () => {
     hasNextPage,
     isFetchingNextPage,
   } = useItemList();
-  console.log(hasNextPage);
   const { pages = [] } = data || {};
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -62,6 +90,21 @@ const Main = () => {
     onIntersect: fetchNextPage,
     enabled: !!hasNextPage,
   });
+
+  const [
+    selectedFilterIds,
+    setSelectedFilterIds,
+  ] = useState<Array<typeof filters[number]['id']>>([]);
+
+  const filteredPages = pages.map(({ list }) => ({
+    list: list.filter((item) => {
+      return (
+        (selectedFilterIds.includes('isSaleOnly') ? !!item.isSale : true)
+          && (selectedFilterIds.includes('isExclusiveOnly') ? !!item.isExclusive : true)
+          && (!selectedFilterIds.includes('isSoldOutIncluded') ? !item.isSoldOut : true)
+      );
+    }),
+  }));
 
   return (
     <Page>
@@ -72,7 +115,52 @@ const Main = () => {
             alt="musinsa-logo"
           />
         </LogoWrapper>
-        filter box
+        <FilterWrapper>
+          <Stack spacing={0.5}>
+            {
+              filters.map((filter) => (
+                <Chip
+                  key={filter.id}
+                  selected={selectedFilterIds.includes(filter.id)}
+                  onClick={() => {
+                    if (selectedFilterIds.includes(filter.id)) {
+                      setSelectedFilterIds(selectedFilterIds.filter(
+                        (selectedFilterId) => selectedFilterId !== filter.id,
+                      ));
+                    } else {
+                      setSelectedFilterIds([
+                        ...selectedFilterIds,
+                        filter.id,
+                      ]);
+                    }
+                  }}
+                >
+                  {filter.name}
+                </Chip>
+              ))
+            }
+          </Stack>
+        </FilterWrapper>
+        <TagWrapper hidden={!selectedFilterIds.length}>
+          <Stack>
+            {
+              selectedFilterIds.map((selectedFilterId) => (
+                <Tag
+                  key={selectedFilterId}
+                  onRemove={() => {
+                    setSelectedFilterIds(selectedFilterIds.filter(
+                      (id) => id !== selectedFilterId,
+                    ));
+                  }}
+                >
+                  {filters.find(
+                    (filter) => filter.id === selectedFilterId,
+                  )?.name}
+                </Tag>
+              ))
+            }
+          </Stack>
+        </TagWrapper>
         <Divider />
       </Page.Topbar>
       <Page.Body>
@@ -98,7 +186,7 @@ const Main = () => {
                 : (
                   <ItemList>
                     {
-                      pages?.map((page, index) => (
+                      filteredPages?.map((page, index) => (
                         <React.Fragment key={index}>
                           {
                             page.list.map((item) => (
