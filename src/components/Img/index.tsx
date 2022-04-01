@@ -1,7 +1,9 @@
 import { ImgHTMLAttributes } from 'react';
 import styled from 'styled-components';
 
-type ImgProps = ImgHTMLAttributes<HTMLImageElement>;
+interface ImgProps extends ImgHTMLAttributes<HTMLImageElement>{
+  fallbackImgSrc?: string;
+}
 
 // ====
 
@@ -13,14 +15,19 @@ const Img = ({
   alt = 'image',
   width,
   height,
+  fallbackImgSrc = 'https://image.msscdn.net/musinsaUI/homework/data/img.jpg',
   ...props
 }: ImgProps) => (
   <Root
     className={className}
-    src={src}
+    src={src ?? fallbackImgSrc}
     alt={alt}
     width={width}
     height={height}
+    onError={({ currentTarget }) => {
+      currentTarget.onerror = null;
+      currentTarget.src = fallbackImgSrc;
+    }}
     {...props}
   />
 );

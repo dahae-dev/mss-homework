@@ -49,13 +49,16 @@ type ColorsType = Record<
 CSSProperties['color']
 >;
 
-type FontSizesType = Record<
+type FontStylesType = Record<
 'xl'
 | 'l'
 | 'm'
 | 's'
 | 'xs',
-CSSProperties['fontSize']
+{
+  fontSize: CSSProperties['fontSize'],
+  lineHeight: CSSProperties['lineHeight'],
+}
 >;
 
 type FontWeightsType = Record<
@@ -125,12 +128,27 @@ const theme: DefaultTheme = {
     red: '#FF0000',
     green: '#18A286',
   },
-  fontSizes: {
-    xl: '20px',
-    l: '16px',
-    m: '14px',
-    s: '12px',
-    xs: '11px',
+  fontStyles: {
+    xl: {
+      fontSize: '20px',
+      lineHeight: '28px',
+    },
+    l: {
+      fontSize: '16px',
+      lineHeight: '24px',
+    },
+    m: {
+      fontSize: '14px',
+      lineHeight: '21px',
+    },
+    s: {
+      fontSize: '12px',
+      lineHeight: '18px',
+    },
+    xs: {
+      fontSize: '11px',
+      lineHeight: '16px',
+    },
   },
   fontWeights: {
     normal: 400,
@@ -158,7 +176,7 @@ declare module 'styled-components' {
     spacing: SpacingType;
     heights: HeightsType;
     colors: ColorsType;
-    fontSizes: FontSizesType;
+    fontStyles: FontStylesType;
     fontWeights: FontWeightsType;
     zIndexes: ZIndexesType;
   }
