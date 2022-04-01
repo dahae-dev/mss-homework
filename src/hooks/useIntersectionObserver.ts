@@ -17,7 +17,6 @@ const useIntersectionObservser = ({
   threshold = 0.0,
   enabled = true,
 }: UseIntersectionObservserProps) => {
-  console.log(enabled, target.current);
   useEffect(() => {
     if (!enabled) {
       return;

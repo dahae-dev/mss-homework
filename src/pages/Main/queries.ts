@@ -16,7 +16,6 @@ const getItemList = async ({ pageParam = 0 }): Promise<IData> => {
 const useItemList = (): UseInfiniteQueryResult<IData> => {
   return useInfiniteQuery('List', getItemList, {
     getNextPageParam: (lastPage, allPages) => {
-      console.log('allPages: ', allPages);
       return (
         allPages.length <= 3
           ? allPages.length
