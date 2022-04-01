@@ -10,6 +10,8 @@ import Page from 'components/Page';
 import Spinner from 'components/Spinner';
 import Stack from 'components/Stack';
 import Tag from 'components/Tag';
+import TextField from 'components/TextField';
+import useDebounce from 'hooks/useDebounce';
 import useIntersectionObservser from 'hooks/useIntersectionObserver';
 import Logo from 'statics/images/logo.svg';
 
@@ -29,6 +31,15 @@ const LogoWrapper = styled.div`
 const FilterWrapper = styled.div`
   ${px(1)}
   ${py(1.75)}
+`;
+
+const SearchWrapper = styled.div<{ hidden: boolean }>`
+  ${px(2)}
+  ${py(2.5)}
+  ${({ hidden }) => hidden ? 'display: none;' : ''};
+  background-color: ${({ theme }) => theme.colors.gray1};
+  display: flex;
+  justify-content: center;
 `;
 
 const TagWrapper = styled.div<{ hidden: boolean }>`
@@ -54,8 +65,7 @@ const ItemCardWrapper = styled.div`
 `;
 
 const LoadMoreSection = styled.div`
-  display: flex;
-  justify-content: center;
+  height: 10px;
 `;
 
 const filters = [
@@ -95,6 +105,9 @@ const Main = () => {
     selectedFilterIds,
     setSelectedFilterIds,
   ] = useState<Array<typeof filters[number]['id']>>([]);
+  const [searchEnabled, setSearchEnabled] = useState(false);
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const debouncedSearchKeyword = useDebounce(searchKeyword, 500);
 
   const filteredPages = pages.map(({ list }) => ({
     list: list.filter((item) => {
@@ -102,6 +115,13 @@ const Main = () => {
         (selectedFilterIds.includes('isSaleOnly') ? !!item.isSale : true)
           && (selectedFilterIds.includes('isExclusiveOnly') ? !!item.isExclusive : true)
           && (!selectedFilterIds.includes('isSoldOutIncluded') ? !item.isSoldOut : true)
+          && (
+            searchEnabled 
+              ? item.goodsName.toLowerCase().includes(
+                debouncedSearchKeyword.toLowerCase(),
+              )
+              : true
+          ) 
       );
     }),
   }));
@@ -117,6 +137,15 @@ const Main = () => {
         </LogoWrapper>
         <FilterWrapper>
           <Stack spacing={0.5}>
+            <Chip
+              active={searchEnabled}
+              onClick={() => {
+                setSearchEnabled(!searchEnabled);
+                setSearchKeyword('');
+              }}
+            >
+              검색
+            </Chip>
             {
               filters.map((filter) => (
                 <Chip
@@ -141,8 +170,34 @@ const Main = () => {
             }
           </Stack>
         </FilterWrapper>
-        <TagWrapper hidden={!selectedFilterIds.length}>
+        <SearchWrapper hidden={!searchEnabled}>
+          <TextField
+            name="search"
+            placeholder="상품명 검색"
+            value={searchKeyword}
+            onChange={(e) => {
+              setSearchKeyword(e.target.value);
+            }}
+          />
+        </SearchWrapper>
+        <TagWrapper
+          hidden={
+            !debouncedSearchKeyword
+              && !selectedFilterIds.length
+          }
+        >
           <Stack>
+            {
+              debouncedSearchKeyword && (
+                <Tag
+                  onRemove={() => {
+                    setSearchKeyword('');
+                  }}
+                >
+                  {debouncedSearchKeyword}
+                </Tag>
+              )
+            }
             {
               selectedFilterIds.map((selectedFilterId) => (
                 <Tag
@@ -212,9 +267,7 @@ const Main = () => {
                               color="gray7"
                             />
                           )
-                          : hasNextPage
-                            ? 'Load more'
-                            : null
+                          : null
                       }
                     </LoadMoreSection>
                   </ItemList>

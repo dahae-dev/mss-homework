@@ -6,13 +6,23 @@ import Text from 'components/Text';
 
 interface ChipProps extends HTMLAttributes<HTMLDivElement> {
   selected?: boolean;
+  active?: boolean;
   disabled?: boolean;
 }
 
 const Root = styled.div<ChipProps>`
   display: inline-block;
-  background-color: ${({ theme }) => theme.colors.white};
-  border: 1px solid ${({ theme }) => theme.colors.gray4};
+  ${({ active, theme }) => (
+    active
+      ? `
+        background-color: ${theme.colors.accent};
+        border: 1px solid ${theme.colors.accent};
+      `
+      : `
+        background-color: ${theme.colors.white};
+        border: 1px solid ${theme.colors.gray4};
+      `
+  )}
   box-sizing: border-box;
   border-radius: 18px;
   text-align: center;
@@ -23,6 +33,7 @@ const Root = styled.div<ChipProps>`
 
 const Chip = ({
   selected = false,
+  active = false,
   disabled = false,
   children,
   ...props
@@ -30,11 +41,16 @@ const Chip = ({
   return (
     <Root
       selected={selected}
+      active={active}
       disabled={disabled}
       {...props}
     >
       <Text
-        color={selected ? 'accent' : 'black'}
+        color={
+          (selected && 'accent')
+            || (active && 'white')
+            || 'black'
+        }
         size="m"
       >
         {children}
