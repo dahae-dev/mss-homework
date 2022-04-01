@@ -1,3 +1,4 @@
+import React, { useRef } from 'react';
 import styled from 'styled-components';
 import { px } from 'styled-components-spacing';
 
@@ -6,9 +7,10 @@ import Img from 'components/Img';
 import ItemCard from 'components/ItemCard';
 import Page from 'components/Page';
 import Spinner from 'components/Spinner';
+import useIntersectionObservser from 'hooks/useIntersectionObserver';
 import Logo from 'statics/images/logo.svg';
 
-import { useList } from './queries';
+import { useItemList } from './queries';
 
 const LogoWrapper = styled.div`
   display: flex;
@@ -37,9 +39,30 @@ const ItemCardWrapper = styled.div`
   max-width: 50%;
 `;
 
+const LoadMoreSection = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
 const Main = () => {
-  const { data, isLoading } = useList();
-  const { list } = data || {};
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useItemList();
+  console.log(hasNextPage);
+  const { pages = [] } = data || {};
+
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  useIntersectionObservser({
+    target: loadMoreRef,
+    onIntersect: fetchNextPage,
+    enabled: !!hasNextPage,
+  });
+
   return (
     <Page>
       <Page.Topbar>
@@ -66,17 +89,50 @@ const Main = () => {
               </Align>
             )
             : (
-              <ItemList>
-                {
-                  list?.map((item) => (
-                    <ItemCardWrapper key={item.goodsNo}>
-                      <ItemCard item={item} />
-                    </ItemCardWrapper>
-                  ))
-                }
-              </ItemList>
+              isError 
+                ? (
+                  <Align horizontal="center" vertical="center">
+                    Unexpected Error    
+                  </Align>
+                )
+                : (
+                  <ItemList>
+                    {
+                      pages?.map((page, index) => (
+                        <React.Fragment key={index}>
+                          {
+                            page.list.map((item) => (
+                              <ItemCardWrapper key={item.goodsNo}>
+                                <ItemCard item={item} />
+                              </ItemCardWrapper>
+                            ))
+                          }
+                        </React.Fragment>
+                      ))
+                    }
+                    <LoadMoreSection
+                      ref={loadMoreRef}
+                    >
+                      {
+                        isFetchingNextPage
+                          ? (
+                            <Spinner
+                              loading={isFetchingNextPage}
+                              size={20}
+                              css=""
+                              speedMultiplier={1}
+                              color="gray7"
+                            />
+                          )
+                          : hasNextPage
+                            ? 'Load more'
+                            : null
+                      }
+                    </LoadMoreSection>
+                  </ItemList>
+                )
             )
-          }
+        }
       </Page.Body>
     </Page>
   );

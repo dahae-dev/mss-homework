@@ -1,4 +1,4 @@
-import { useQuery, UseQueryResult } from 'react-query';
+import { useInfiniteQuery, UseInfiniteQueryResult } from 'react-query';
 
 import api from 'services/api';
 import type { IItem } from 'types';
@@ -8,16 +8,25 @@ interface IData {
   list: Array<IItem>
 }
 
-const getList = async (): Promise<IData> => {
-  const { data: result } = await api.get('/goods0.json');
+const getItemList = async ({ pageParam = 0 }): Promise<IData> => {
+  const { data: result } = await api.get(`/goods${pageParam}.json`);
   return result.data;
 };
 
-const useList = (): UseQueryResult<IData> => {
-  return useQuery('List', getList);
+const useItemList = (): UseInfiniteQueryResult<IData> => {
+  return useInfiniteQuery('List', getItemList, {
+    getNextPageParam: (lastPage, allPages) => {
+      console.log('allPages: ', allPages);
+      return (
+        allPages.length <= 3
+          ? allPages.length
+          : null
+      );
+    },
+  });
 };
 
-export { useList };
+export { useItemList };
 
 
  
