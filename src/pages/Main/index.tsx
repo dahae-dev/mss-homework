@@ -4,6 +4,7 @@ import { px, py } from 'styled-components-spacing';
 
 import Align from 'components/Align';
 import Chip from 'components/Chip';
+import EmptyState from 'components/EmptyState';
 import Img from 'components/Img';
 import ItemCard from 'components/ItemCard';
 import Page from 'components/Page';
@@ -125,6 +126,7 @@ const Main = () => {
       );
     }),
   }));
+  const isEmpty = filteredPages.every((page) => !page.list.length);
 
   return (
     <Page>
@@ -239,38 +241,46 @@ const Main = () => {
                   </Align>
                 )
                 : (
-                  <ItemList>
-                    {
-                      filteredPages?.map((page, index) => (
-                        <React.Fragment key={index}>
+                  isEmpty
+                    ? (
+                      <Align horizontal="center" vertical="center">
+                        <EmptyState />
+                      </Align>
+                    )
+                    : (
+                      <ItemList>
+                        {
+                          filteredPages?.map((page, index) => (
+                            <React.Fragment key={index}>
+                              {
+                                page.list.map((item) => (
+                                  <ItemCardWrapper key={item.goodsNo}>
+                                    <ItemCard item={item} />
+                                  </ItemCardWrapper>
+                                ))
+                              }
+                            </React.Fragment>
+                          ))
+                        }
+                        <LoadMoreSection
+                          ref={loadMoreRef}
+                        >
                           {
-                            page.list.map((item) => (
-                              <ItemCardWrapper key={item.goodsNo}>
-                                <ItemCard item={item} />
-                              </ItemCardWrapper>
-                            ))
+                            isFetchingNextPage
+                              ? (
+                                <Spinner
+                                  loading={isFetchingNextPage}
+                                  size={20}
+                                  css=""
+                                  speedMultiplier={1}
+                                  color="gray7"
+                                />
+                              )
+                              : null
                           }
-                        </React.Fragment>
-                      ))
-                    }
-                    <LoadMoreSection
-                      ref={loadMoreRef}
-                    >
-                      {
-                        isFetchingNextPage
-                          ? (
-                            <Spinner
-                              loading={isFetchingNextPage}
-                              size={20}
-                              css=""
-                              speedMultiplier={1}
-                              color="gray7"
-                            />
-                          )
-                          : null
-                      }
-                    </LoadMoreSection>
-                  </ItemList>
+                        </LoadMoreSection>
+                      </ItemList>
+                    )
                 )
             )
         }
