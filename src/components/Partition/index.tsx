@@ -3,6 +3,7 @@ import styled, { CSSProperties, DefaultTheme } from 'styled-components';
 import { px, mx } from 'styled-components-spacing';
 
 interface PartitionProps {
+  className?: string;
   valign?: CSSProperties['alignItems'];
   halign?: CSSProperties['justifyContent'];
   spacing?: keyof DefaultTheme['spacing'];
@@ -44,12 +45,14 @@ const Side = styled.div<PartitionSectioinProps>`
 `;
 
 const Partition = ({
+  className = '',
   valign = 'baseline',
   halign = 'flex-start',
   spacing = 1,
   children,
 }: PropsWithChildren<PartitionProps>) => (
   <Root
+    className={className}
     valign={valign}
     halign={halign}
     spacing={spacing}

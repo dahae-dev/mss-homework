@@ -2,12 +2,14 @@ import { HTMLAttributes } from 'react';
 import styled from 'styled-components';
 import { px, py } from 'styled-components-spacing';
 
+import Stack from 'components/Stack';
 import Text from 'components/Text';
 
 interface ChipProps extends HTMLAttributes<HTMLDivElement> {
   selected?: boolean;
   active?: boolean;
   disabled?: boolean;
+  suffix?: React.ReactNode;
 }
 
 const Root = styled.div<ChipProps>`
@@ -35,6 +37,7 @@ const Chip = ({
   selected = false,
   active = false,
   disabled = false,
+  suffix = null,
   children,
   ...props
 }: React.PropsWithChildren<ChipProps>) => {
@@ -45,16 +48,19 @@ const Chip = ({
       disabled={disabled}
       {...props}
     >
-      <Text
-        color={
-          (selected && 'accent')
-            || (active && 'white')
-            || 'black'
-        }
-        size="m"
-      >
-        {children}
-      </Text>
+      <Stack spacing={0.75} valign="center">
+        <Text
+          color={
+            (selected && 'accent')
+              || (active && 'white')
+              || 'black'
+          }
+          size="m"
+        >
+          {children}
+        </Text>
+        {suffix}
+      </Stack>
     </Root>
   );
 };

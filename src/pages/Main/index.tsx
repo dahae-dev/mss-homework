@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { Search, RefreshCw } from 'react-feather';
 import styled from 'styled-components';
 import { px, py } from 'styled-components-spacing';
 
@@ -8,6 +9,7 @@ import EmptyState from 'components/EmptyState';
 import Img from 'components/Img';
 import ItemCard from 'components/ItemCard';
 import Page from 'components/Page';
+import Partition from 'components/Partition';
 import Spinner from 'components/Spinner';
 import Stack from 'components/Stack';
 import Tag from 'components/Tag';
@@ -138,13 +140,19 @@ const Main = () => {
           />
         </LogoWrapper>
         <FilterWrapper>
-          <Stack spacing={0.5}>
+          <Stack spacing={0.5} valign="center">
             <Chip
               active={searchEnabled}
               onClick={() => {
                 setSearchEnabled(!searchEnabled);
                 setSearchKeyword('');
               }}
+              suffix={(
+                <Search
+                  color={searchEnabled ? 'white' : '#979797'}
+                  size={12}
+                />
+              )}
             >
               검색
             </Chip>
@@ -180,43 +188,64 @@ const Main = () => {
             onChange={(e) => {
               setSearchKeyword(e.target.value);
             }}
+            prefix={(
+              <Search
+                color="#979797"
+                size={20}
+              />
+            )}
           />
         </SearchWrapper>
         <TagWrapper
           hidden={
-            !debouncedSearchKeyword
+            !(searchEnabled && debouncedSearchKeyword)
               && !selectedFilterIds.length
           }
         >
-          <Stack>
-            {
-              debouncedSearchKeyword && (
-                <Tag
-                  onRemove={() => {
-                    setSearchKeyword('');
-                  }}
-                >
-                  {debouncedSearchKeyword}
-                </Tag>
-              )
-            }
-            {
-              selectedFilterIds.map((selectedFilterId) => (
-                <Tag
-                  key={selectedFilterId}
-                  onRemove={() => {
-                    setSelectedFilterIds(selectedFilterIds.filter(
-                      (id) => id !== selectedFilterId,
-                    ));
-                  }}
-                >
-                  {filters.find(
-                    (filter) => filter.id === selectedFilterId,
-                  )?.name}
-                </Tag>
-              ))
-            }
-          </Stack>
+          <Partition spacing={1} valign="center">
+            <Partition.Main>
+              <Stack spacing={0.5} valign="center">
+                {
+                  (searchEnabled && debouncedSearchKeyword) && (
+                    <Tag
+                      onRemove={() => {
+                        setSearchKeyword('');
+                      }}
+                    >
+                      {debouncedSearchKeyword}
+                    </Tag>
+                  )
+                }
+                {
+                  selectedFilterIds.map((selectedFilterId) => (
+                    <Tag
+                      key={selectedFilterId}
+                      onRemove={() => {
+                        setSelectedFilterIds(selectedFilterIds.filter(
+                          (id) => id !== selectedFilterId,
+                        ));
+                      }}
+                    >
+                      {filters.find(
+                        (filter) => filter.id === selectedFilterId,
+                      )?.name}
+                    </Tag>
+                  ))
+                }
+              </Stack>
+            </Partition.Main>
+            <Partition.Side>
+              <RefreshCw
+                color="#979797"
+                size={20}
+                onClick={() => {
+                  setSelectedFilterIds([]);
+                  setSearchKeyword('');
+                  setSearchEnabled(false);
+                }}
+              />
+            </Partition.Side>
+          </Partition>
         </TagWrapper>
         <Divider />
       </Page.Topbar>

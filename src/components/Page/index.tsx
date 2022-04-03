@@ -22,6 +22,7 @@ const Topbar = styled.div`
   left: 0;
   right: 0;
   background-color: ${({ theme }) => theme.colors.white};
+  z-index: ${({ theme }) => theme.zIndexes[1]};
 `;
 
 const Body = styled.div`
